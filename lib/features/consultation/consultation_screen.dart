@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
-import '../../core/theme/app_colors.dart';
 
 class ConsultationScreen extends StatefulWidget {
   const ConsultationScreen({super.key});

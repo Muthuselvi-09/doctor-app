@@ -11,8 +11,8 @@ class ReminderSchedulerScreen extends StatefulWidget {
 }
 
 class _ReminderSchedulerScreenState extends State<ReminderSchedulerScreen> {
-  String _frequency = 'Monthly';
-  TimeOfDay _notificationTime = const TimeOfDay(hour: 9, minute: 0);
+  final String _frequency = 'Monthly';
+  final TimeOfDay _notificationTime = const TimeOfDay(hour: 9, minute: 0);
   bool _sendToAdmin = false;
   final Map<String, bool> _channels = {
     'Push Notification': true,

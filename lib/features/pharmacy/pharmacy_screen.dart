@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
-import '../../core/theme/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../core/theme/revival_colors.dart';
+import '../../features/license_renewal/logic/renewal_flow_coordinator.dart';
 
 class PharmacyScreen extends StatelessWidget {
   const PharmacyScreen({super.key});
@@ -8,45 +10,73 @@ class PharmacyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: RevivalColors.softGrey,
       appBar: AppBar(
-        title: const Text('Pharmacy'),
+        title: Text('Pharmacy Portal', 
+          style: GoogleFonts.outfit(
+            color: RevivalColors.deepNavy, 
+            fontWeight: FontWeight.bold
+          )
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined),
+            icon: const Icon(Icons.notifications_outlined, color: RevivalColors.deepNavy),
             onPressed: () {},
+          ),
+          const SizedBox(width: 8),
+          const Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: CircleAvatar(
+              radius: 16,
+              backgroundColor: RevivalColors.navyBlue,
+              child: Icon(Icons.local_pharmacy, size: 20, color: Colors.white),
+            ),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildPrescriptionUpload(),
+            _buildHeader(),
+             const SizedBox(height: 24),
+            
+            _buildSectionHeader('License Renewals'),
+            const SizedBox(height: 12),
+            _buildLicenseGrid(context),
+            
             const SizedBox(height: 32),
-            _buildSectionTitle('Categories'),
-            const SizedBox(height: 16),
-            _buildCategories(),
-            const SizedBox(height: 32),
-            _buildSectionTitle('Popular Medicines'),
-            const SizedBox(height: 16),
-            _buildProductGrid(),
+            _buildSectionHeader('Compliance & Safety'),
+            const SizedBox(height: 12),
+             _buildComplianceGrid(context),
+             
+             const SizedBox(height: 32),
+             _buildTrackingSection(),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {}, // TODO: Link to Invoice/Support
+        backgroundColor: RevivalColors.navyBlue,
+        icon: const Icon(Icons.support_agent),
+        label: Text('Support', style: GoogleFonts.outfit(fontWeight: FontWeight.w600)),
       ),
     );
   }
 
-  Widget _buildPrescriptionUpload() {
+  Widget _buildHeader() {
     return FadeInDown(
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(24),
+          color: RevivalColors.navyBlue,
+          borderRadius: BorderRadius.circular(20),
           gradient: const LinearGradient(
-            colors: [Color(0xFF0E6EFF), Color(0xFF00C2A8)],
+            colors: [RevivalColors.navyBlue, Color(0xFF334155)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -57,46 +87,48 @@ class PharmacyScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Order with Prescription',
-                    style: TextStyle(
+                  Text(
+                    'Green Cross Pharmacy',
+                    style: GoogleFonts.outfit(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   Text(
-                    'Upload your prescription and we will take care of the rest.',
-                    style: TextStyle(
+                    'License ID: PHARM-1122-3344',
+                    style: GoogleFonts.outfit(
                       color: Colors.white.withOpacity(0.8),
-                      fontSize: 12,
+                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: AppColors.primary,
-                      minimumSize: const Size(120, 40),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                   Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '3 Renewals Due',
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    child: const Text('Upload Now'),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(16),
+                color: Colors.white.withOpacity(0.1),
+                shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.description_outlined, color: Colors.white, size: 40),
+              child: const Icon(Icons.storefront, color: Colors.white, size: 40),
             ),
           ],
         ),
@@ -104,121 +136,211 @@ class PharmacyScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionHeader(String title) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-    );
-  }
-
-  Widget _buildCategories() {
-    final categories = [
-      {'name': 'Health', 'icon': Icons.favorite_outline},
-      {'name': 'Personal', 'icon': Icons.person_outline},
-      {'name': 'Baby Care', 'icon': Icons.child_care},
-      {'name': 'Wellness', 'icon': Icons.spa_outlined},
-    ];
-
-    return SizedBox(
-      height: 100,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          return Container(
-            width: 80,
-            margin: const EdgeInsets.only(right: 16),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.black.withOpacity(0.05)),
-                  ),
-                  child: Icon(categories[index]['icon'] as IconData, color: AppColors.primary),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  categories[index]['name'] as String,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                ),
-              ],
-            ),
-          );
-        },
+      style: GoogleFonts.outfit(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: RevivalColors.deepNavy,
       ),
     );
   }
 
-  Widget _buildProductGrid() {
+  Widget _buildLicenseGrid(BuildContext context) {
+    final licenses = [
+      {'name': 'Drug License Renewal', 'expiry': 'Expiring in 30 days', 'status': 'Urgent', 'icon': Icons.medication},
+      {'name': 'Pharmacy Registration', 'expiry': 'Valid till Oct 2026', 'status': 'Active', 'icon': Icons.assignment_turned_in},
+      {'name': 'Establishment License', 'expiry': 'Valid till Dec 2025', 'status': 'Active', 'icon': Icons.business},
+      {'name': 'Trade License', 'expiry': 'Expiring in 2 months', 'status': 'Pending', 'icon': Icons.store},
+    ];
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.75,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
+        childAspectRatio: 1.1,
       ),
-      itemCount: 4,
+      itemCount: licenses.length,
       itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.black.withOpacity(0.05)),
-          ),
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: AppColors.accent,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Center(
-                  child: Icon(Icons.medication_outlined, size: 40, color: AppColors.primary),
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Paracetamol 500mg',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const Text(
-                '10 Tablets',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-              ),
-              const Spacer(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    '\$12.50',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.add, color: Colors.white, size: 16),
-                  ),
-                ],
-              ),
-            ],
-          ),
+        final license = licenses[index];
+        return FadeInUp(
+          delay: Duration(milliseconds: 100 * index),
+          child: _buildServiceCard(context, license),
         );
       },
     );
   }
+  
+  Widget _buildComplianceGrid(BuildContext context) {
+    final services = [
+      {'name': 'Cold Storage License', 'expiry': 'Valid', 'status': 'Active', 'icon': Icons.ac_unit},
+      {'name': 'Bio-Medical Waste', 'expiry': 'Renewal Due', 'status': 'Urgent', 'icon': Icons.delete_sweep},
+      {'name': 'Fire Safety', 'expiry': 'Valid', 'status': 'Active', 'icon': Icons.fire_extinguisher},
+      {'name': 'Insurance Policy', 'expiry': 'Valid', 'status': 'Active', 'icon': Icons.shield},
+    ];
+    
+     return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 1.2,
+      ),
+      itemCount: services.length,
+      itemBuilder: (context, index) {
+        final service = services[index];
+        return FadeInUp(
+          delay: Duration(milliseconds: 100 * index + 400),
+          child: _buildServiceCard(context, service),
+        );
+      },
+    );
+  }
+
+  Widget _buildServiceCard(BuildContext context, Map<String, dynamic> item) {
+    Color statusColor = Colors.green;
+    if (item['status'] == 'Urgent') statusColor = Colors.orange;
+    if (item['status'] == 'Pending') statusColor = Colors.red;
+
+    return GestureDetector(
+      onTap: () {
+         // Strict Flow using Coordinator
+         // Step 1 -> 2
+         RenewalFlowCoordinator.startRenewal(context, item['name']);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: RevivalColors.softGrey,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(item['icon'] as IconData, size: 24, color: RevivalColors.navyBlue),
+                ),
+                 Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item['name'] as String,
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: RevivalColors.deepNavy,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item['expiry'] as String,
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    color: RevivalColors.darkGrey,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildTrackingSection() {
+    return FadeInUp(
+      delay: const Duration(milliseconds: 600),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: RevivalColors.midGrey.withOpacity(0.5)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Renewal Tracking',
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: RevivalColors.deepNavy,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: const Text('View All'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildTrackingItem('Drug License', 'Under Verification', 0.6),
+            const SizedBox(height: 16),
+            _buildTrackingItem('Bio-Medical Waste', 'Review Pending', 0.3),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildTrackingItem(String title, String status, double progress) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.w500)),
+            Text(status, style: GoogleFonts.outfit(fontSize: 12, color: RevivalColors.primaryBlue)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        LinearProgressIndicator(
+          value: progress,
+          backgroundColor: RevivalColors.softGrey,
+          valueColor: const AlwaysStoppedAnimation<Color>(RevivalColors.primaryBlue),
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ],
+    );
+  }
 }
+

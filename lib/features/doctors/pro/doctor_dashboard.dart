@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../license_renewal/logic/renewal_flow_coordinator.dart';
 
 class DoctorDashboard extends StatelessWidget {
   const DoctorDashboard({super.key});
@@ -36,18 +36,18 @@ class DoctorDashboard extends StatelessWidget {
             const SizedBox(height: 12),
             _buildGridSection(context, [
               {'name': 'Medical License', 'icon': Icons.badge_outlined, 'status': 'Active', 'expiry': 'Oct 2026', 'docs': '4'},
+              {'name': 'Practice License', 'icon': Icons.medical_services_outlined, 'status': 'Active', 'expiry': 'Jun 2026', 'docs': '6'},
               {'name': 'Speciality License', 'icon': Icons.workspace_premium_outlined, 'status': 'Active', 'expiry': 'Nov 2027', 'docs': '3'},
-              {'name': 'CME Credits', 'icon': Icons.school_outlined, 'status': 'Pending', 'expiry': 'Dec 2025', 'docs': '1'},
-              {'name': 'Medical Indemnity', 'icon': Icons.shield_outlined, 'status': 'Expiring Soon', 'expiry': 'Aug 2025', 'docs': '2'},
+              {'name': 'Clinic License', 'icon': Icons.storefront_outlined, 'status': 'Pending', 'expiry': 'Jan 2025', 'docs': '5'}, // Added
+              {'name': 'Hospital License', 'icon': Icons.local_hospital, 'status': 'Active', 'expiry': 'Aug 2026', 'docs': '8'}, // Added
+              {'name': 'Indemnity Insurance', 'icon': Icons.shield_outlined, 'status': 'Expiring Soon', 'expiry': 'Aug 2025', 'docs': '2'}, // Added
             ]),
 
             const SizedBox(height: 24),
-            _buildSectionHeader('Establishment Licenses'),
+            _buildSectionHeader('Compliance & Establishment'),
             const SizedBox(height: 12),
              _buildGridSection(context, [
-              {'name': 'Practice License', 'icon': Icons.local_hospital_outlined, 'status': 'Active', 'expiry': 'Jun 2026', 'docs': '6'},
-              {'name': 'Clinic License', 'icon': Icons.storefront_outlined, 'status': 'Pending', 'expiry': 'Jan 2025', 'docs': '2'},
-              {'name': 'Hospital License', 'icon': Icons.apartment_outlined, 'status': 'Active', 'expiry': 'Aug 2026', 'docs': '8'},
+              {'name': 'CME Credits', 'icon': Icons.school_outlined, 'status': 'Pending', 'expiry': 'Dec 2025', 'docs': '1'},
               {'name': 'E-Prescription', 'icon': Icons.medication_outlined, 'status': 'Active', 'expiry': 'Mar 2027', 'docs': '5'},
             ]),
             const SizedBox(height: 40),
@@ -106,7 +106,8 @@ class DoctorDashboard extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-         context.push('/compliance-detail', extra: item['name']);
+         // Strict Flow
+         RenewalFlowCoordinator.startRenewal(context, item['name']);
       },
       borderRadius: BorderRadius.circular(16),
       child: Container(

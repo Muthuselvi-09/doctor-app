@@ -1,216 +1,166 @@
 import 'package:flutter/material.dart';
-import 'package:animate_do/animate_do.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RenewalRequirementsScreen extends StatelessWidget {
+import 'package:go_router/go_router.dart';
+import '../../../../core/theme/revival_colors.dart';
+import 'package:doctor_app/features/license_renewal/domain/models/compliance_models.dart';
+import 'package:doctor_app/features/license_renewal/presentation/providers/compliance_providers.dart';
+
+class RenewalRequirementsScreen extends ConsumerWidget {
   const RenewalRequirementsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final servicesAsync = ref.watch(licenseServicesProvider);
+    final documentsAsync = ref.watch(complianceDocumentsProvider);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: RevivalColors.softGrey,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: RevivalColors.navyBlue),
           onPressed: () => context.pop(),
         ),
-        title: const Text('Renewal Requirements'),
-        backgroundColor: AppColors.background,
+        title: const Text(
+          'Requirements Checklist',
+          style: TextStyle(color: RevivalColors.navyBlue, fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        backgroundColor: RevivalColors.white,
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoCard(),
-            const SizedBox(height: 32),
-            _buildSectionTitle('Required Documents'),
-            const SizedBox(height: 16),
-            _buildDocumentList(),
-            const SizedBox(height: 32),
-            _buildSectionTitle('Financials & Guidelines'),
-            const SizedBox(height: 16),
-            _buildPlaceholderSection('Renewal Fees', 'Est. ₹5,000 - ₹15,000 depending on state council.', Icons.payments_outlined),
-            const SizedBox(height: 16),
-            _buildPlaceholderSection('Govt. Guidelines', 'Last updated: Jan 10, 2026. View official notification.', Icons.menu_book_rounded),
-            const SizedBox(height: 48),
+      body: servicesAsync.when(
+        data: (services) {
+          // Mock: current service is 'med_renewal'
+          final service = services.firstWhere((s) => s.id == 'med_renewal');
+          
+          return documentsAsync.when(
+            data: (vaultDocs) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildInfoCard(),
+                    const SizedBox(height: 32),
+                    _buildSectionTitle('Required Documents'),
+                    const SizedBox(height: 16),
+                    ...service.requiredDocumentIds.map((docId) {
+                      final vaultDoc = vaultDocs.firstWhere(
+                        (d) => d.id == docId,
+                        orElse: () => LicenseDocument(id: docId, name: _getFallbackDocName(docId), category: 'General'),
+                      );
+                      return _buildDocumentRequirementCard(context, vaultDoc);
+                    }),
+                    const SizedBox(height: 32),
+                    _buildSectionTitle('Financials & Guidelines'),
+                    const SizedBox(height: 16),
+                    _buildPlaceholderSection('Renewal Fees', 'Est. ₹5,000 - ₹15,000', Icons.payments_outlined),
+                    const SizedBox(height: 16),
+                    _buildPlaceholderSection('Govt. Guidelines', 'Last updated: Jan 10, 2026', Icons.menu_book_rounded),
+                    const SizedBox(height: 80),
+                  ],
+                ),
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, s) => Center(child: Text('Error: $e')),
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, s) => Center(child: Text('Error: $e')),
+      ),
+      bottomSheet: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: RevivalColors.white,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5)),
           ],
+        ),
+        child: ElevatedButton(
+          onPressed: () => context.push('/revival-document-upload'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: RevivalColors.navyBlue,
+            minimumSize: const Size(double.infinity, 56),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+          child: const Text('Proceed to Upload', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
       ),
     );
+  }
+
+  String _getFallbackDocName(String id) {
+    if (id == 'doc_reg_cert') return 'Medical Council Registration';
+    if (id == 'doc_passport_photo') return 'Passport Size Photo';
+    return 'Supporting Document';
   }
 
   Widget _buildInfoCard() {
-    return FadeInDown(
-      child: Container(
+    return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.7),
+          color: RevivalColors.accent.withOpacity(0.5),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.3)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
+          border: Border.all(color: RevivalColors.navyBlue.withOpacity(0.05)),
         ),
         child: const Row(
           children: [
-            Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 28),
+            Icon(Icons.info_outline_rounded, color: RevivalColors.primaryBlue, size: 28),
             SizedBox(width: 16),
             Expanded(
               child: Text(
-                'Please ensure all documents are scanned in high resolution. Supported: PDF, JPG, PNG.',
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 13, height: 1.4),
+                'Documents already in your vault will be reused automatically. Please upload missing ones.',
+                style: TextStyle(color: RevivalColors.navyBlue, fontSize: 13, height: 1.4),
               ),
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildSectionTitle(String title) {
-    return FadeInLeft(
-      child: Text(
+    return Text(
         title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-      ),
-    );
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: RevivalColors.navyBlue),
+      );
   }
 
-  Widget _buildDocumentList() {
-    final docs = [
-      {'title': 'Identity Proof', 'optional': false},
-      {'title': 'Address Proof', 'optional': false},
-      {'title': 'MBBS Degree', 'optional': false},
-      {'title': 'Post Graduate Certificate', 'optional': true},
-      {'title': 'Diploma Certificate', 'optional': true},
-      {'title': 'Internship Completion Certificate', 'optional': false},
-      {'title': 'Medical Council Registration Certificate', 'optional': false},
-      {'title': 'Previous Renewal Certificate', 'optional': true},
-      {'title': 'CME Certificates (Multi-upload)', 'optional': false},
-      {'title': 'CME Hours Summary', 'optional': false},
-      {'title': 'Clinic/Practice License', 'optional': false},
-      {'title': 'Specialty License', 'optional': true},
-      {'title': 'Passport Photo', 'optional': false},
-      {'title': 'Digital Signature', 'optional': true},
-      {'title': 'Additional Supporting Documents', 'optional': true},
-    ];
-
-    return Column(
-      children: List.generate(docs.length, (index) {
-        final doc = docs[index];
-        return FadeInUp(
-          delay: Duration(milliseconds: 50 * index),
-          child: _DocumentRequirementCard(
-            title: doc['title'] as String,
-            isOptional: doc['optional'] as bool,
-            status: index == 0 ? 'Verified' : (index < 3 ? 'Pending' : 'Not Uploaded'),
-          ),
-        );
-      }),
-    );
-  }
-
-  Widget _buildPlaceholderSection(String title, String subtitle, IconData icon) {
-    return FadeInUp(
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.8),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withOpacity(0.5)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.accent.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(icon, color: AppColors.primary, size: 24),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                  const SizedBox(height: 4),
-                  Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textHint),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DocumentRequirementCard extends StatelessWidget {
-  final String title;
-  final bool isOptional;
-  final String status;
-
-  const _DocumentRequirementCard({
-    required this.title,
-    required this.isOptional,
-    required this.status,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildDocumentRequirementCard(BuildContext context, LicenseDocument doc) {
     Color statusColor;
     IconData statusIcon;
+    String statusLabel;
 
-    switch (status) {
-      case 'Verified':
-        statusColor = Colors.green;
+    switch (doc.status) {
+      case DocumentStatus.verified:
+        statusColor = RevivalColors.activeGreen;
         statusIcon = Icons.check_circle_rounded;
+        statusLabel = 'VERIFIED';
         break;
-      case 'Rejected':
-        statusColor = Colors.red;
-        statusIcon = Icons.cancel_rounded;
-        break;
-      case 'Pending':
-        statusColor = Colors.orange;
+      case DocumentStatus.pending:
+        statusColor = RevivalColors.pendingBlue;
         statusIcon = Icons.hourglass_empty_rounded;
+        statusLabel = 'IN VAULT';
+        break;
+      case DocumentStatus.rejected:
+        statusColor = RevivalColors.expiredRed;
+        statusIcon = Icons.cancel_rounded;
+        statusLabel = 'REJECTED';
         break;
       default:
-        statusColor = Colors.grey;
+        statusColor = RevivalColors.darkGrey;
         statusIcon = Icons.cloud_upload_outlined;
+        statusLabel = 'MISSING';
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: RevivalColors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: RevivalColors.navyBlue.withOpacity(0.05)),
       ),
       child: Row(
         children: [
@@ -218,30 +168,9 @@ class _DocumentRequirementCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        title,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (isOptional) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.textHint.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text(
-                          'OPTIONAL',
-                          style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
-                        ),
-                      ),
-                    ],
-                  ],
+                Text(
+                  doc.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: RevivalColors.navyBlue),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -249,7 +178,7 @@ class _DocumentRequirementCard extends StatelessWidget {
                     Icon(statusIcon, size: 14, color: statusColor),
                     const SizedBox(width: 6),
                     Text(
-                      status,
+                      statusLabel,
                       style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                   ],
@@ -257,20 +186,48 @@ class _DocumentRequirementCard extends StatelessWidget {
               ],
             ),
           ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert_rounded, color: AppColors.textHint),
-            onSelected: (value) {
-              if (value == 'upload') {
-                context.push('/upload-preview', extra: title);
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: 'view', child: Text('View Details')),
-              PopupMenuItem(value: 'upload', child: Text(status == 'Verified' ? 'Update' : 'Upload')),
-            ],
-          ),
+          if (doc.status != DocumentStatus.verified)
+            IconButton(
+              icon: const Icon(Icons.add_a_photo_outlined, color: RevivalColors.primaryBlue, size: 20),
+              onPressed: () => context.push('/revival-document-upload'),
+            ),
         ],
       ),
     );
+  }
+
+  Widget _buildPlaceholderSection(String title, String subtitle, IconData icon) {
+    return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: RevivalColors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: RevivalColors.navyBlue.withOpacity(0.05)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: RevivalColors.accent,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: RevivalColors.primaryBlue, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: RevivalColors.navyBlue)),
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: const TextStyle(color: RevivalColors.darkGrey, fontSize: 12)),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: RevivalColors.darkGrey),
+          ],
+        ),
+      );
   }
 }

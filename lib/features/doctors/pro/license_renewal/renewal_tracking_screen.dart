@@ -1,39 +1,116 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/revival_colors.dart';
 
 class RenewalTrackingScreen extends StatelessWidget {
   const RenewalTrackingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: RevivalColors.softGrey,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: RevivalColors.deepNavy),
+            onPressed: () => context.pop(),
+          ),
+          title: Text('License Lifecycle', style: GoogleFonts.outfit(color: RevivalColors.deepNavy, fontWeight: FontWeight.bold)),
+          backgroundColor: Colors.white,
+          elevation: 0,
+          bottom: TabBar(
+            labelColor: RevivalColors.navyBlue,
+            unselectedLabelColor: RevivalColors.darkGrey,
+            indicatorColor: RevivalColors.navyBlue,
+            labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            tabs: const [
+              Tab(text: 'Active Log'),
+              Tab(text: 'History'),
+            ],
+          ),
         ),
-        title: const Text('License Lifecycle'),
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        body: TabBarView(
           children: [
-            _buildCurrentStatusCard(context),
-            const SizedBox(height: 32),
-            _buildSectionTitle('Compliance Timeline'),
-            const SizedBox(height: 24),
-            _buildVerticalTimeline(),
-            const SizedBox(height: 40),
+            _buildActiveLog(context),
+            _buildHistoryList(),
           ],
         ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {},
+          backgroundColor: RevivalColors.activeGreen,
+          icon: const Icon(Icons.smart_toy),
+          label: Text('Ask Chatbot', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        ),
       ),
+    );
+  }
+
+  Widget _buildActiveLog(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildCurrentStatusCard(context),
+          const SizedBox(height: 32),
+          Text('Compliance Timeline', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: RevivalColors.deepNavy)),
+          const SizedBox(height: 24),
+          _buildVerticalTimeline(),
+          const SizedBox(height: 80), // Space for FAB
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHistoryList() {
+    final history = [
+      {'year': '2024', 'status': 'Approved', 'date': 'Oct 24, 2024', 'cert': 'LIC-2024.pdf'},
+      {'year': '2019', 'status': 'Approved', 'date': 'Oct 22, 2019', 'cert': 'LIC-2019.pdf'},
+      {'year': '2014', 'status': 'Approved', 'date': 'Oct 20, 2014', 'cert': 'LIC-2014.pdf'},
+    ];
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(24),
+      itemCount: history.length,
+      itemBuilder: (context, index) {
+        final item = history[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: RevivalColors.softGrey, shape: BoxShape.circle),
+                child: const Icon(Icons.history, color: RevivalColors.navyBlue),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Renewal ${item['year']}', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: RevivalColors.deepNavy)),
+                    Text('Completed on ${item['date']}', style: GoogleFonts.outfit(color: RevivalColors.darkGrey, fontSize: 12)),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                child: Text('Approved', style: GoogleFonts.outfit(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -42,42 +119,28 @@ class RenewalTrackingScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.8),
-          borderRadius: BorderRadius.circular(32),
-          border: Border.all(color: Colors.white.withOpacity(0.5)),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10)),
-          ],
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: RevivalColors.midGrey),
+           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
         ),
         child: Column(
           children: [
             const CircleAvatar(
-              radius: 40,
-              backgroundColor: AppColors.accent,
-              child: Icon(Icons.hourglass_bottom_rounded, color: AppColors.primary, size: 40),
+              radius: 30,
+              backgroundColor: RevivalColors.softGrey,
+              child: Icon(Icons.hourglass_bottom_rounded, color: RevivalColors.navyBlue, size: 30),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Application Pending',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: RevivalColors.deepNavy),
             ),
+            const SizedBox(height: 8),
             Text(
               'Your renewal is being reviewed by the Medical Council. Check back in 2-3 business days.',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              style: GoogleFonts.outfit(color: RevivalColors.darkGrey, fontSize: 14),
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () => context.push('/certificate-download'),
-              icon: const Icon(Icons.verified_user_rounded),
-              label: const Text('View & Download Certificate'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green.withOpacity(0.1),
-                foregroundColor: Colors.green,
-                elevation: 0,
-                side: const BorderSide(color: Colors.green),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              ),
             ),
           ],
         ),
@@ -85,29 +148,13 @@ class RenewalTrackingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickStat(String label, String value) {
-    return Column(
-      children: [
-        Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.bold)),
-        Text(value, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 14)),
-      ],
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-    );
-  }
-
   Widget _buildVerticalTimeline() {
     final events = [
       {'title': 'License Issued', 'date': 'Oct 24, 2021', 'status': 'completed', 'desc': 'Initial registration approved.'},
-      {'title': 'Verified for Renewal', 'date': 'Jan 15, 2026', 'status': 'completed', 'desc': 'Documents verified by clinic admin.'},
-      {'title': 'Renewal Submitted', 'date': 'Jan 22, 2026', 'status': 'active', 'desc': 'Application under review by council.'},
-      {'title': 'Approval Expected', 'date': 'Feb 10, 2026', 'status': 'pending', 'desc': 'Awaiting council decision.'},
-      {'title': 'New Expiry Date', 'date': 'Oct 24, 2031', 'status': 'pending', 'desc': 'Projected validity period.'},
+      {'title': 'Verified for Renewal', 'date': 'Jan 15, 2026', 'status': 'completed', 'desc': 'Documents verified.'},
+      {'title': 'Renewal Submitted', 'date': 'Jan 22, 2026', 'status': 'active', 'desc': 'Application under review.'},
+      {'title': 'Bot Verification', 'date': 'Jan 23, 2026', 'status': 'pending', 'desc': 'Chatbot pre-check pending.'},
+      {'title': 'Council Approval', 'date': 'Feb 10, 2026', 'status': 'pending', 'desc': 'Final authority decision.'},
     ];
 
     return Column(
@@ -127,76 +174,54 @@ class RenewalTrackingScreen extends StatelessWidget {
   Widget _buildTimelineStep(String title, String date, String desc, String status, {bool isLast = false}) {
     Color pointColor;
     Color lineColor;
-    double dotSize = 16;
-    FontWeight titleWeight = FontWeight.bold;
-
+    
     switch (status) {
       case 'completed':
         pointColor = Colors.green;
-        lineColor = Colors.green.withOpacity(0.3);
+        lineColor = Colors.green;
         break;
       case 'active':
-        pointColor = AppColors.primary;
-        lineColor = AppColors.primary.withOpacity(0.3);
-        dotSize = 20;
+        pointColor = RevivalColors.navyBlue;
+        lineColor = RevivalColors.navyBlue;
         break;
       default:
-        pointColor = Colors.grey[300]!;
-        lineColor = Colors.grey[200]!;
-        titleWeight = FontWeight.w500;
+        pointColor = RevivalColors.midGrey;
+        lineColor = RevivalColors.midGrey;
     }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 20,
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 4),
-                width: dotSize,
-                height: dotSize,
-                decoration: BoxDecoration(
-                  color: pointColor,
-                  shape: BoxShape.circle,
-                  border: status == 'active' ? Border.all(color: Colors.white, width: 3) : null,
-                  boxShadow: status == 'active' ? [BoxShadow(color: pointColor.withOpacity(0.4), blurRadius: 10)] : null,
-                ),
-                child: status == 'active' ? const Icon(Icons.sync_rounded, color: Colors.white, size: 10) : null,
-              ),
-              if (!isLast)
-                Container(
-                  width: 2,
-                  height: 60, // Fixed height for timeline segment instead of Expanded
-                  color: lineColor,
-                ),
-            ],
-          ),
+        Column(
+          children: [
+            Container(
+              width: 16, height: 16,
+              decoration: BoxDecoration(color: pointColor, shape: BoxShape.circle),
+              child: status == 'completed' ? const Icon(Icons.check, size: 10, color: Colors.white) : null,
+            ),
+            if (!isLast) Container(width: 2, height: 60, color: lineColor.withOpacity(0.3)),
+          ],
         ),
-        const SizedBox(width: 20),
+        const SizedBox(width: 16),
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: FadeInRight(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                       Text(title, style: TextStyle(fontWeight: titleWeight, fontSize: 15, color: status == 'pending' ? Colors.grey : AppColors.textPrimary)),
-                       Text(date, style: TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                   const SizedBox(height: 4),
-                   Text(desc, style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4)),
+                   Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15, color: RevivalColors.deepNavy)),
+                   Text(date, style: GoogleFonts.outfit(fontSize: 12, color: RevivalColors.darkGrey)),
                 ],
               ),
-            ),
+               const SizedBox(height: 4),
+               Text(desc, style: GoogleFonts.outfit(fontSize: 12, color: RevivalColors.darkGrey)),
+               const SizedBox(height: 24),
+            ],
           ),
         ),
       ],
     );
   }
 }
+

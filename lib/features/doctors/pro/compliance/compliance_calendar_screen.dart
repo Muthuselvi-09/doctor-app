@@ -10,7 +10,7 @@ class ComplianceCalendarScreen extends StatefulWidget {
 }
 
 class _ComplianceCalendarScreenState extends State<ComplianceCalendarScreen> {
-  DateTime _selectedDate = DateTime.now();
+  final DateTime _selectedDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {

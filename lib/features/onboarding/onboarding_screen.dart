@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/theme/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../core/theme/revival_colors.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -16,25 +17,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<OnboardingData> _onboardingItems = [
     OnboardingData(
-      title: 'Manage Medical Licenses & Renewals Easily',
+      title: 'License Renewal Made Easy',
       description: 'Streamline your professional credentials and stay compliant with regulatory requirements effortlessly.',
-      icon: Icons.badge_outlined,
+      icon: Icons.verified_user_outlined,
     ),
     OnboardingData(
-      title: 'Upload Documents & Track Compliance',
-      description: 'Securely store your certifications and get real-time tracking for all your licensing applications.',
-      icon: Icons.cloud_upload_outlined,
+      title: 'Compliance & CME Management',
+      description: 'Track your CME credits and manage compliance documents in one secure place.',
+      icon: Icons.assignment_turned_in_outlined,
     ),
     OnboardingData(
-      title: 'For Doctors, Hospitals and Pharmacies',
-      description: 'A unified platform for healthcare professionals and institutions to manage medical compliance.',
-      icon: Icons.account_balance_rounded,
+      title: 'One Platform for Doctors & Hospitals',
+      description: 'A unified digital ecosystem connecting doctors, clinics, and hospitals for seamless operations.',
+      icon: Icons.apartment_rounded,
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: RevivalColors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          TextButton(
+            onPressed: () => context.go('/role-selection'),
+            child: Text(
+              'Skip',
+              style: GoogleFonts.outfit(
+                color: RevivalColors.navyBlue,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+        ],
+      ),
       body: Stack(
         children: [
           PageView.builder(
@@ -50,56 +70,50 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             },
           ),
           Positioned(
-            bottom: 50,
-            left: 20,
-            right: 20,
-            child: Column(
+            bottom: 40,
+            left: 24,
+            right: 24,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Indicators
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
                     _onboardingItems.length,
                     (index) => AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      margin: const EdgeInsets.only(right: 8),
                       height: 8,
                       width: _currentPage == index ? 24 : 8,
                       decoration: BoxDecoration(
                         color: _currentPage == index
-                            ? AppColors.primary
-                            : AppColors.primary.withOpacity(0.2),
+                            ? RevivalColors.navyBlue
+                            : RevivalColors.midGrey,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () => context.go('/login'),
-                      child: const Text('Skip'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_currentPage < _onboardingItems.length - 1) {
-                          _pageController.nextPage(
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeInOut,
-                          );
-                        } else {
-                          context.go('/login');
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(120, 56),
-                      ),
-                      child: Text(_currentPage == _onboardingItems.length - 1
-                          ? 'Get Started'
-                          : 'Next'),
-                    ),
-                  ],
+                
+                // Next/Get Started Button
+                ElevatedButton(
+                  onPressed: () {
+                    if (_currentPage < _onboardingItems.length - 1) {
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                      );
+                    } else {
+                      context.go('/role-selection');
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: RevivalColors.navyBlue,
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(20),
+                    minimumSize: const Size(60, 60),
+                  ),
+                  child: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
                 ),
               ],
             ),
@@ -130,44 +144,55 @@ class OnboardingItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           FadeInDown(
+            duration: const Duration(milliseconds: 800),
             child: Container(
-              height: 200,
-              width: 200,
+              height: 280,
+              width: double.infinity,
               decoration: BoxDecoration(
-                color: AppColors.accent,
-                shape: BoxShape.circle,
+                color: RevivalColors.softGrey,
+                borderRadius: BorderRadius.circular(30),
               ),
               child: Icon(
                 data.icon,
-                size: 100,
-                color: AppColors.primary,
+                size: 120,
+                color: RevivalColors.navyBlue,
               ),
             ),
           ),
           const SizedBox(height: 48),
           FadeInUp(
+            duration: const Duration(milliseconds: 600),
             child: Text(
               data.title,
-              style: Theme.of(context).textTheme.displayMedium,
+              style: GoogleFonts.outfit(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: RevivalColors.deepNavy,
+                height: 1.2,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: 16),
           FadeInUp(
             delay: const Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 600),
             child: Text(
               data.description,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: GoogleFonts.outfit(
+                fontSize: 16,
+                color: RevivalColors.darkGrey,
+                height: 1.5,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
+          const SizedBox(height: 80), // Space for bottom controls
         ],
       ),
     );

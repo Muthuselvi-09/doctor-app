@@ -1,69 +1,98 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:animate_do/animate_do.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/revival_colors.dart';
+import 'package:doctor_app/features/license_renewal/domain/models/compliance_models.dart';
+import 'package:doctor_app/features/license_renewal/presentation/providers/compliance_providers.dart';
 
-class DocumentListScreen extends StatefulWidget {
+class DocumentListScreen extends ConsumerWidget {
   const DocumentListScreen({super.key});
 
   @override
-  State<DocumentListScreen> createState() => _DocumentListScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final documentsAsync = ref.watch(complianceDocumentsProvider);
 
-class _DocumentListScreenState extends State<DocumentListScreen> {
-  final List<Map<String, String>> _documents = [
-    {'title': 'Medical License Front', 'type': 'PDF', 'size': '2.1 MB', 'date': 'Oct 24, 2026', 'status': 'Active'},
-    {'title': 'Medical License Back', 'type': 'PDF', 'size': '1.8 MB', 'date': 'Oct 24, 2026', 'status': 'Active'},
-    {'title': 'Indemnity Insurance Policy', 'type': 'PDF', 'size': '3.2 MB', 'date': 'Oct 12, 2026', 'status': 'Expiring'},
-    {'title': 'Clinic Registration Deed', 'type': 'JPG', 'size': '4.5 MB', 'date': 'Jan 15, 2025', 'status': 'Pending'},
-    {'title': 'Aadhaar Card', 'type': 'JPG', 'size': '1.1 MB', 'date': 'Lifetime', 'status': 'Active'},
-    {'title': 'CME Certificate 2024', 'type': 'PDF', 'size': '520 KB', 'date': 'Dec 31, 2029', 'status': 'Active'},
-  ];
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: RevivalColors.softGrey,
       appBar: AppBar(
-        title: const Text('All Documents', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
-        centerTitle: true,
-        backgroundColor: AppColors.background,
+        title: const Text(
+          'Document Vault',
+          style: TextStyle(color: RevivalColors.navyBlue, fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        centerTitle: false,
+        backgroundColor: RevivalColors.white,
         elevation: 0,
-        leading: const BackButton(color: AppColors.textPrimary),
+        leading: const BackButton(color: RevivalColors.navyBlue),
         actions: [
           IconButton(
-            icon: const Icon(Icons.sort_rounded, color: AppColors.textPrimary),
-            onPressed: () {}, // TODO: Implement sorting
+            icon: const Icon(Icons.search_rounded, color: RevivalColors.navyBlue),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.filter_list_rounded, color: RevivalColors.navyBlue),
+            onPressed: () {},
           ),
         ],
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(24),
-        itemCount: _documents.length,
-        separatorBuilder: (c, i) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final doc = _documents[index];
-          return FadeInUp(
-            delay: Duration(milliseconds: 50 * index),
-            child: _buildDocumentCard(doc),
-          );
-        },
+      body: documentsAsync.when(
+        data: (documents) => ListView.separated(
+          padding: const EdgeInsets.all(24),
+          itemCount: documents.length,
+          separatorBuilder: (c, i) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final doc = documents[index];
+            return FadeInUp(
+              delay: Duration(milliseconds: 50 * index),
+              child: _buildDocumentCard(doc),
+            );
+          },
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, s) => Center(child: Text('Error: $e')),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        backgroundColor: RevivalColors.navyBlue,
+        child: const Icon(Icons.add_rounded, color: Colors.white),
       ),
     );
   }
 
-  Widget _buildDocumentCard(Map<String, String> doc) {
-    Color statusColor = Colors.green;
-    if (doc['status'] == 'Expiring') statusColor = Colors.orange;
-    if (doc['status'] == 'Pending') statusColor = Colors.redAccent;
+  Widget _buildDocumentCard(LicenseDocument doc) {
+    Color statusColor;
+    String statusLabel;
+
+    switch (doc.status) {
+      case DocumentStatus.verified:
+        statusColor = RevivalColors.activeGreen;
+        statusLabel = 'VERIFIED';
+        break;
+      case DocumentStatus.pending:
+        statusColor = RevivalColors.pendingBlue;
+        statusLabel = 'PENDING';
+        break;
+      case DocumentStatus.rejected:
+        statusColor = RevivalColors.expiredRed;
+        statusLabel = 'REJECTED';
+        break;
+      case DocumentStatus.expired:
+        statusColor = RevivalColors.expiringOrange;
+        statusLabel = 'EXPIRED';
+        break;
+      default:
+        statusColor = RevivalColors.darkGrey;
+        statusLabel = 'UNKNOWN';
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: RevivalColors.navyBlue.withOpacity(0.05)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -72,16 +101,16 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
       child: Row(
         children: [
           Container(
-            width: 50,
-            height: 50,
+            width: 54,
+            height: 54,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(12),
+              color: RevivalColors.accent,
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(
-              doc['type'] == 'PDF' ? Icons.picture_as_pdf_rounded : Icons.image_rounded,
-              color: AppColors.primary,
-              size: 24,
+            child: const Icon(
+              Icons.description_outlined,
+              color: RevivalColors.primaryBlue,
+              size: 26,
             ),
           ),
           const SizedBox(width: 16),
@@ -90,25 +119,25 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  doc['title']!,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary),
+                  doc.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: RevivalColors.navyBlue),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${doc['size']} • Expires: ${doc['date']}',
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  '${doc.category} • ${doc.expiryDate != null ? "Expires: ${doc.expiryDate!.day}/${doc.expiryDate!.month}/${doc.expiryDate!.year}" : "Permanent"}',
+                  style: const TextStyle(color: RevivalColors.darkGrey, fontSize: 12),
                 ),
               ],
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              doc['status']!,
+              statusLabel,
               style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
             ),
           ),

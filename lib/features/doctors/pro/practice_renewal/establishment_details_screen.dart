@@ -115,7 +115,7 @@ class _EstablishmentDetailsScreenState extends State<EstablishmentDetailsScreen>
         border: Border.all(color: Colors.white.withOpacity(0.5)),
       ),
       child: DropdownButtonFormField<String>(
-        value: _establishmentType,
+        initialValue: _establishmentType,
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
