@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:go_router/go_router.dart';
+import 'package:doctor_app/features/hospital/license_renewal/data/hospital_license_dummy_data.dart';
+import 'package:doctor_app/features/hospital/license_renewal/presentation/screens/hospital_renewal_stepper_screen.dart';
+import 'package:doctor_app/features/hospital/license_renewal/domain/models/hospital_license_config.dart';
 
 class HospitalDashboardScreen extends StatelessWidget {
   const HospitalDashboardScreen({super.key});
@@ -131,7 +134,32 @@ class HospitalDashboardScreen extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-         context.push('/compliance-detail', extra: item['name']);
+         // Find matching configuration
+         HospitalLicenseConfig? config;
+         try {
+           // Simple fuzzy matching or ID mapping for demo
+           String name = item['name'];
+           if (name.contains("Hospital Registration")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'hosp_reg');
+           else if (name.contains("Trade")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'trade');
+           else if (name.contains("Fire")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'fire');
+           else if (name.contains("Pollution")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'pollution');
+           else if (name.contains("Bio Medical")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'bmw');
+           else if (name.contains("Clinical")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'clinical');
+           else if (name.contains("Lift")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'lift');
+           else if (name.contains("Radiology") || name.contains("X-Ray")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'radiology');
+           else if (name.contains("NABH") || name.contains("NABL")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'nabh');
+           else if (name.contains("Insurance")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'insurance');
+           
+           // Default fallback
+           config ??= HospitalLicenseDummyData.allLicenses.first;
+         } catch (e) {
+           config = HospitalLicenseDummyData.allLicenses.first;
+         }
+
+         Navigator.push(
+           context, 
+           MaterialPageRoute(builder: (context) => HospitalRenewalStepperScreen(licenseConfig: config!))
+         );
       },
       borderRadius: BorderRadius.circular(16),
       child: Container(

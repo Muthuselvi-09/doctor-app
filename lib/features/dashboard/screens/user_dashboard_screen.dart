@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:doctor_app/core/theme/revival_colors.dart';
 import 'doctor_portal_tab.dart';
 import 'hospital_portal_tab.dart';
+import '../../pharmacy/pharmacy_screen.dart';
 import 'profile_tab.dart';
 
 class UserDashboardScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
   final List<Widget> _tabs = const [
     DoctorPortalTab(),
     HospitalPortalTab(),
+    PharmacyScreen(),
     ProfileTab(),
   ];
 
@@ -69,6 +71,11 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
               icon: Icon(Icons.apartment_outlined),
               activeIcon: Icon(Icons.apartment_rounded),
               label: 'Hospital',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.local_pharmacy_outlined),
+              activeIcon: Icon(Icons.local_pharmacy_rounded),
+              label: 'Pharmacy',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),

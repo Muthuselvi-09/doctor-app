@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/revival_colors.dart';
-import '../../features/license_renewal/logic/renewal_flow_coordinator.dart';
+
+import 'license_renewal/data/pharmacy_license_dummy_data.dart';
+import 'license_renewal/presentation/screens/pharmacy_renewal_stepper_screen.dart';
+import 'license_renewal/domain/models/pharmacy_license_config.dart';
 
 class PharmacyScreen extends StatelessWidget {
   const PharmacyScreen({super.key});
@@ -58,12 +61,6 @@ class PharmacyScreen extends StatelessWidget {
              _buildTrackingSection(),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {}, // TODO: Link to Invoice/Support
-        backgroundColor: RevivalColors.navyBlue,
-        icon: const Icon(Icons.support_agent),
-        label: Text('Support', style: GoogleFonts.outfit(fontWeight: FontWeight.w600)),
       ),
     );
   }
@@ -148,13 +145,8 @@ class PharmacyScreen extends StatelessWidget {
   }
 
   Widget _buildLicenseGrid(BuildContext context) {
-    final licenses = [
-      {'name': 'Drug License Renewal', 'expiry': 'Expiring in 30 days', 'status': 'Urgent', 'icon': Icons.medication},
-      {'name': 'Pharmacy Registration', 'expiry': 'Valid till Oct 2026', 'status': 'Active', 'icon': Icons.assignment_turned_in},
-      {'name': 'Establishment License', 'expiry': 'Valid till Dec 2025', 'status': 'Active', 'icon': Icons.business},
-      {'name': 'Trade License', 'expiry': 'Expiring in 2 months', 'status': 'Pending', 'icon': Icons.store},
-    ];
-
+    final licenses = PharmacyLicenseDummyData.allLicenses;
+    
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -176,43 +168,21 @@ class PharmacyScreen extends StatelessWidget {
   }
   
   Widget _buildComplianceGrid(BuildContext context) {
-    final services = [
-      {'name': 'Cold Storage License', 'expiry': 'Valid', 'status': 'Active', 'icon': Icons.ac_unit},
-      {'name': 'Bio-Medical Waste', 'expiry': 'Renewal Due', 'status': 'Urgent', 'icon': Icons.delete_sweep},
-      {'name': 'Fire Safety', 'expiry': 'Valid', 'status': 'Active', 'icon': Icons.fire_extinguisher},
-      {'name': 'Insurance Policy', 'expiry': 'Valid', 'status': 'Active', 'icon': Icons.shield},
-    ];
-    
-     return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 1.2,
-      ),
-      itemCount: services.length,
-      itemBuilder: (context, index) {
-        final service = services[index];
-        return FadeInUp(
-          delay: Duration(milliseconds: 100 * index + 400),
-          child: _buildServiceCard(context, service),
-        );
-      },
-    );
+    // For now, hiding this or keeping it empty as all licenses are in the main grid
+    return const SizedBox.shrink();
   }
 
-  Widget _buildServiceCard(BuildContext context, Map<String, dynamic> item) {
+  Widget _buildServiceCard(BuildContext context, PharmacyLicenseConfig config) {
     Color statusColor = Colors.green;
-    if (item['status'] == 'Urgent') statusColor = Colors.orange;
-    if (item['status'] == 'Pending') statusColor = Colors.red;
+    // Dummy logic for status color
+    if (config.name.contains("Drug") || config.name.contains("Waste")) statusColor = Colors.orange;
 
     return GestureDetector(
       onTap: () {
-         // Strict Flow using Coordinator
-         // Step 1 -> 2
-         RenewalFlowCoordinator.startRenewal(context, item['name']);
+         Navigator.push(
+           context, 
+           MaterialPageRoute(builder: (context) => PharmacyRenewalStepperScreen(licenseConfig: config))
+         );
       },
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -240,7 +210,7 @@ class PharmacyScreen extends StatelessWidget {
                     color: RevivalColors.softGrey,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(item['icon'] as IconData, size: 24, color: RevivalColors.navyBlue),
+                  child: Icon(config.icon, size: 24, color: RevivalColors.navyBlue),
                 ),
                  Container(
                   width: 8,
@@ -256,7 +226,7 @@ class PharmacyScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item['name'] as String,
+                  config.name,
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -267,7 +237,7 @@ class PharmacyScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  item['expiry'] as String,
+                  "Tap to Renew", // Generic subtitle since we don't have dynamic expiry yet
                   style: GoogleFonts.outfit(
                     fontSize: 12,
                     color: RevivalColors.darkGrey,

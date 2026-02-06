@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/revival_colors.dart';
-import '../../features/license_renewal/logic/renewal_flow_coordinator.dart';
+
+import '../../features/hospital/license_renewal/data/hospital_license_dummy_data.dart';
+import '../../features/hospital/license_renewal/presentation/screens/hospital_renewal_stepper_screen.dart';
+import '../../features/hospital/license_renewal/domain/models/hospital_license_config.dart';
 
 class HospitalOpsDashboard extends StatelessWidget {
   const HospitalOpsDashboard({super.key});
@@ -115,8 +118,30 @@ class HospitalOpsDashboard extends StatelessWidget {
   Widget _buildLicenseCard(BuildContext context, Map<String, dynamic> item) {
     return InkWell(
       onTap: () {
-        // Strict Flow Step 1 -> 2
-        RenewalFlowCoordinator.startRenewal(context, item['name']);
+        // Find matching configuration
+        HospitalLicenseConfig? config;
+        try {
+          String name = item['name'];
+          if (name.contains("Registration License")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'hosp_reg');
+          else if (name.contains("Trade")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'trade');
+          else if (name.contains("Fire")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'fire');
+          else if (name.contains("Pollution")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'pollution');
+          else if (name.contains("Bio-Medical")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'bmw');
+          else if (name.contains("Clinical")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'clinical');
+          else if (name.contains("Lift")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'lift');
+          else if (name.contains("Radiology") || name.contains("X-Ray")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'radiology');
+          else if (name.contains("NABH") || name.contains("NABL")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'nabh');
+          else if (name.contains("Insurance")) config = HospitalLicenseDummyData.allLicenses.firstWhere((e) => e.id == 'insurance');
+          
+          config ??= HospitalLicenseDummyData.allLicenses.first;
+        } catch (e) {
+          config = HospitalLicenseDummyData.allLicenses.first;
+        }
+
+        Navigator.push(
+          context, 
+          MaterialPageRoute(builder: (context) => HospitalRenewalStepperScreen(licenseConfig: config!))
+        );
       },
       child: Container(
         decoration: BoxDecoration(

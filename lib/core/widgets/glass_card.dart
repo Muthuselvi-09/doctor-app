@@ -34,7 +34,9 @@ class GlassCard extends StatelessWidget {
         begin: begin ?? Alignment.topLeft,
         end: end ?? Alignment.bottomRight,
         colors: [
+          // ignore: deprecated_member_use
           Colors.white.withOpacity(0.1),
+          // ignore: deprecated_member_use
           Colors.white.withOpacity(0.05),
         ],
         stops: const [0.1, 1],
@@ -43,7 +45,9 @@ class GlassCard extends StatelessWidget {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
+          // ignore: deprecated_member_use
           Colors.white.withOpacity(0.5),
+          // ignore: deprecated_member_use
           Colors.white.withOpacity(0.2),
         ],
       ),

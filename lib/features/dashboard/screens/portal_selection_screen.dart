@@ -97,7 +97,7 @@ class PortalSelectionScreen extends StatelessWidget {
                      // Assuming no specific pharmacy tab yet, maybe same dashboard but new tab?
                      // I will route to dashboard index 2 if I add it, or just show a snackbar/placeholder route.
                      // The user image shows it exists. I'll route to a placeholder route.
-                     context.go('/pharmacy-portal'); 
+                     context.go('/user-dashboard', extra: 2); // Index 2 for Pharmacy Tab
                   },
                 ),
               ),
